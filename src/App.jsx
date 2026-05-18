@@ -518,88 +518,90 @@ export default function HabitTrackerApp() {
     <div className="min-h-screen bg-[#FFF9F4] px-4 py-6 text-[#3F3A36] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <header className="mb-5 flex flex-col gap-4 rounded-[28px] border border-[#F3D8D1] bg-white px-5 py-5 shadow-sm md:flex-row md:items-center md:justify-between">
-  {editingDisplayName ? (
-    <div className="max-w-md space-y-2">
-      <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">
-        Tên hiển thị
-      </p>
+          <div>
+            {editingDisplayName ? (
+              <div className="max-w-md space-y-2">
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">
+                  Tên hiển thị
+                </p>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <input
-          value={displayNameInput}
-          onChange={(e) => setDisplayNameInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
-          className="min-w-0 flex-1 rounded-2xl border border-[#F3D8D1] bg-white px-4 py-3 text-lg font-black text-[#0A6962] outline-none focus:border-[#F07167]"
-          autoFocus
-        />
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    value={displayNameInput}
+                    onChange={(e) => setDisplayNameInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
+                    className="min-w-0 flex-1 rounded-2xl border border-[#F3D8D1] bg-white px-4 py-3 text-lg font-black text-[#0A6962] outline-none focus:border-[#F07167]"
+                    autoFocus
+                  />
 
-        <button
-          onClick={saveDisplayName}
-          disabled={saving}
-          className="rounded-2xl bg-[#0081A7] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
-        >
-          Lưu
-        </button>
+                  <button
+                    onClick={saveDisplayName}
+                    disabled={saving}
+                    className="rounded-2xl bg-[#0081A7] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                  >
+                    Lưu
+                  </button>
 
-        <button
-          onClick={cancelEditDisplayName}
-          className="rounded-2xl bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66]"
-        >
-          Hủy
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div>
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">
-          {displayName}
-        </p>
+                  <button
+                    onClick={cancelEditDisplayName}
+                    className="rounded-2xl bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66]"
+                  >
+                    Hủy
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">
+                    {displayName}
+                  </p>
 
-        <button
-          onClick={() => setEditingDisplayName(true)}
-          className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white"
-        >
-          Đổi tên
-        </button>
-      </div>
+                  <button
+                    onClick={() => setEditingDisplayName(true)}
+                    className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white"
+                  >
+                    Đổi tên
+                  </button>
+                </div>
 
-      <h1 className="mt-1 text-3xl font-black tracking-tight text-[#0A6962] md:text-4xl">
-        Habit Tracker
-      </h1>
+                <h1 className="mt-1 text-3xl font-black tracking-tight text-[#0A6962] md:text-4xl">
+                  Habit Tracker
+                </h1>
 
-      <p className="mt-1 text-sm text-[#756B66]">
-        Theo dõi việc tuần và thói quen tháng thật gọn gàng.
-      </p>
-    </div>
-  )}
+                <p className="mt-1 text-sm text-[#756B66]">
+                  Theo dõi việc tuần và thói quen tháng thật gọn gàng.
+                </p>
+              </div>
+            )}
+          </div>
 
-  <div className="flex flex-wrap items-center gap-2">
-    <span className="rounded-full bg-[#FFF0EA] px-4 py-2 text-sm font-bold text-[#C65D54]">
-      Hôm nay: {todayProgress}%
-    </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-[#FFF0EA] px-4 py-2 text-sm font-bold text-[#C65D54]">
+              Hôm nay: {todayProgress}%
+            </span>
 
-    <span className="rounded-full bg-[#EAF7FA] px-4 py-2 text-sm font-bold text-[#0081A7]">
-      {session.user.email}
-    </span>
+            <span className="rounded-full bg-[#EAF7FA] px-4 py-2 text-sm font-bold text-[#0081A7]">
+              {session.user.email}
+            </span>
 
-    {!isInstalled && (
-      <button
-        onClick={handleInstallApp}
-        className="rounded-full bg-[#0081A7] px-4 py-2 text-sm font-bold text-white hover:opacity-90"
-      >
-        Cài app
-      </button>
-    )}
+            {!isInstalled && (
+              <button
+                onClick={handleInstallApp}
+                className="rounded-full bg-[#0081A7] px-4 py-2 text-sm font-bold text-white hover:opacity-90"
+              >
+                Cài app
+              </button>
+            )}
 
-    <button
-      onClick={signOut}
-      className="rounded-full bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66] hover:bg-[#F07167] hover:text-white"
-    >
-      Đăng xuất
-    </button>
-  </div>
-</header>
+            <button
+              onClick={signOut}
+              className="rounded-full bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66] hover:bg-[#F07167] hover:text-white"
+            >
+              Đăng xuất
+            </button>
+          </div>
+        </header>
 
         <main className="space-y-5">
           <TodayBoard
@@ -822,11 +824,21 @@ function TodayItem({ item, dateKey, isItemDone, toggleDone, deleteItem, editingI
 
       {!isEditing && (
         <div className="flex gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100">
-          <button onClick={() => startEditItem(item)} className="rounded-full bg-[#EAF7FA] px-3 py-1 text-xs font-bold text-[#0081A7] hover:bg-[#0081A7] hover:text-white">
-            Sửa
+          <button
+            onClick={() => startEditItem(item)}
+            className="grid h-8 w-8 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
+            title="Sửa"
+            aria-label="Sửa"
+          >
+            <PencilIcon className="h-4 w-4" />
           </button>
-          <button onClick={() => deleteItem(item)} className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white">
-            Xóa
+          <button
+            onClick={() => deleteItem(item)}
+            className="grid h-8 w-8 place-items-center rounded-full text-[#C65D54]/75 hover:bg-[#FFF0EA] hover:text-[#C65D54]"
+            title="Xóa"
+            aria-label="Xóa"
+          >
+            <CloseIcon className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -947,8 +959,22 @@ function WeeklyTaskBoard({ weekDays, selectedDate, setSelectedDate, getTasksForD
                         <>
                           <span className={`flex-1 break-words text-xs leading-4 ${isItemDone(task, dateKey) ? "text-[#A0938E] line-through" : "text-[#3F3A36]"}`}>{task.title}</span>
                           <div className="hidden gap-1 group-hover:flex">
-                            <button onClick={() => startEditItem(task)} className="text-xs font-bold text-[#0081A7]">Sửa</button>
-                            <button onClick={() => deleteItem(task)} className="text-xs font-bold text-[#C65D54]">×</button>
+                            <button
+                              onClick={() => startEditItem(task)}
+                              className="grid h-6 w-6 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
+                              title="Sửa"
+                              aria-label="Sửa"
+                            >
+                              <PencilIcon className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => deleteItem(task)}
+                              className="grid h-6 w-6 place-items-center rounded-full text-[#C65D54]/75 hover:bg-[#FFF0EA] hover:text-[#C65D54]"
+                              title="Xóa"
+                              aria-label="Xóa"
+                            >
+                              <CloseIcon className="h-3.5 w-3.5" />
+                            </button>
                           </div>
                         </>
                       )}
@@ -1021,8 +1047,22 @@ function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits,
                           <div className="font-bold text-[#3F3A36]">{habit.title}</div>
                           <div className="mt-1 text-xs text-[#9A8B85]">{doneCount}/{monthDays.length} ngày</div>
                           <div className="mt-2 flex gap-2">
-                            <button onClick={() => startEditItem(habit)} className="rounded-full bg-[#EAF7FA] px-3 py-1 text-xs font-bold text-[#0081A7] hover:bg-[#0081A7] hover:text-white">Sửa</button>
-                            <button onClick={() => deleteItem(habit)} className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white">Xóa</button>
+                            <button
+                              onClick={() => startEditItem(habit)}
+                              className="grid h-8 w-8 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
+                              title="Sửa"
+                              aria-label="Sửa"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteItem(habit)}
+                              className="grid h-8 w-8 place-items-center rounded-full text-[#C65D54]/75 hover:bg-[#FFF0EA] hover:text-[#C65D54]"
+                              title="Xóa"
+                              aria-label="Xóa"
+                            >
+                              <CloseIcon className="h-4 w-4" />
+                            </button>
                           </div>
                         </div>
                       )}
@@ -1060,6 +1100,42 @@ function Card({ title, icon, children }) {
       <h2 className="mb-3 flex items-center gap-2 text-xl font-black text-[#0A6962]"><span>{icon}</span>{title}</h2>
       {children}
     </section>
+  );
+}
+
+function PencilIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
   );
 }
 
