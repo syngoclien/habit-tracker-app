@@ -79,6 +79,8 @@ export default function HabitTrackerApp() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   const todayKey = getDateKey(new Date());
   const selectedDateKey = getDateKey(selectedDate);
@@ -88,6 +90,33 @@ export default function HabitTrackerApp() {
 
   const habits = items.filter((item) => item.type === "habit");
   const tasks = items.filter((item) => item.type === "task");
+
+  useEffect(() => {
+    const checkInstalled = () => {
+      const standalone = window.matchMedia("(display-mode: standalone)").matches;
+      const iosStandalone = window.navigator.standalone === true;
+      setIsInstalled(standalone || iosStandalone);
+    };
+
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+
+    const handleAppInstalled = () => {
+      setInstallPrompt(null);
+      setIsInstalled(true);
+    };
+
+    checkInstalled();
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -163,6 +192,21 @@ export default function HabitTrackerApp() {
     setItems([]);
     setCompletions([]);
     setRolloverHistory([]);
+  }
+
+  async function handleInstallApp() {
+    if (!installPrompt) {
+      alert("Nếu trình duyệt chưa hiện nút cài, chị có thể bấm menu của trình duyệt rồi chọn Cài đặt ứng dụng hoặc Thêm vào màn hình chính.");
+      return;
+    }
+
+    installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      setInstallPrompt(null);
+      setIsInstalled(true);
+    }
   }
 
   async function loadCloudData() {
@@ -414,6 +458,14 @@ export default function HabitTrackerApp() {
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-[#FFF0EA] px-4 py-2 text-sm font-bold text-[#C65D54]">Hôm nay: {todayProgress}%</span>
             <span className="rounded-full bg-[#EAF7FA] px-4 py-2 text-sm font-bold text-[#0081A7]">{session.user.email}</span>
+            {!isInstalled && (
+              <button
+                onClick={handleInstallApp}
+                className="rounded-full bg-[#0081A7] px-4 py-2 text-sm font-bold text-white hover:opacity-90"
+              >
+                Cài app
+              </button>
+            )}
             <button onClick={signOut} className="rounded-full bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66] hover:bg-[#F07167] hover:text-white">Đăng xuất</button>
           </div>
         </header>

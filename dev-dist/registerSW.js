@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/habit-tracker-app/dev-sw.js?dev-sw', { scope: '/habit-tracker-app/', type: 'classic' })
