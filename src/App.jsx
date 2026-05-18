@@ -76,6 +76,11 @@ export default function HabitTrackerApp() {
   const [newTask, setNewTask] = useState("");
   const [newTaskDate, setNewTaskDate] = useState(getDateKey(new Date()));
   const [newHabit, setNewHabit] = useState("");
+  const [displayName, setDisplayName] = useState("Ngọc Liên");
+  const [editingDisplayName, setEditingDisplayName] = useState(false);
+  const [displayNameInput, setDisplayNameInput] = useState("Ngọc Liên");
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -87,6 +92,13 @@ export default function HabitTrackerApp() {
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
   const monthDays = useMemo(() => getMonthDays(selectedDate), [selectedDate]);
   const userId = session?.user?.id;
+
+  useEffect(() => {
+    if (!session?.user) return;
+    const name = session.user.user_metadata?.display_name || session.user.email?.split("@")[0] || "Người dùng";
+    setDisplayName(name);
+    setDisplayNameInput(name);
+  }, [session]);
 
   const habits = items.filter((item) => item.type === "habit");
   const tasks = items.filter((item) => item.type === "task");
@@ -192,6 +204,30 @@ export default function HabitTrackerApp() {
     setItems([]);
     setCompletions([]);
     setRolloverHistory([]);
+  }
+
+  async function saveDisplayName() {
+    const value = displayNameInput.trim();
+    if (!value) {
+      alert("Tên hiển thị không được để trống nhé.");
+      return;
+    }
+
+    setSaving(true);
+    const { data, error } = await supabase.auth.updateUser({
+      data: { display_name: value },
+    });
+    setSaving(false);
+
+    if (error) return alert(error.message);
+
+    setDisplayName(data.user.user_metadata?.display_name || value);
+    setEditingDisplayName(false);
+  }
+
+  function cancelEditDisplayName() {
+    setDisplayNameInput(displayName);
+    setEditingDisplayName(false);
   }
 
   async function handleInstallApp() {
@@ -341,6 +377,39 @@ export default function HabitTrackerApp() {
     setNewHabit("");
   }
 
+  function startEditItem(item) {
+    setEditingItemId(item.id);
+    setEditingTitle(item.title);
+  }
+
+  function cancelEditItem() {
+    setEditingItemId(null);
+    setEditingTitle("");
+  }
+
+  async function saveEditItem(item) {
+    const value = editingTitle.trim();
+    if (!value) {
+      alert("Tên không được để trống nhé.");
+      return;
+    }
+
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("habit_items")
+      .update({ title: value })
+      .eq("id", item.id)
+      .select()
+      .single();
+
+    setSaving(false);
+
+    if (error) return alert(error.message);
+
+    setItems((current) => current.map((row) => (row.id === item.id ? data : row)));
+    cancelEditItem();
+  }
+
   async function deleteItem(item) {
     const confirmed = window.confirm(`Xóa “${item.title}” nhé?`);
     if (!confirmed) return;
@@ -450,9 +519,31 @@ export default function HabitTrackerApp() {
       <div className="mx-auto max-w-7xl">
         <header className="mb-5 flex flex-col gap-4 rounded-[28px] border border-[#F3D8D1] bg-white px-5 py-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">Ngọc Liên</p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight text-[#0A6962] md:text-4xl">Habit Tracker</h1>
-            <p className="mt-1 text-sm text-[#756B66]">Theo dõi việc tuần và thói quen tháng thật gọn gàng.</p>
+            {editingDisplayName ? (
+              <div className="max-w-md space-y-2">
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">Tên hiển thị</p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    value={displayNameInput}
+                    onChange={(e) => setDisplayNameInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
+                    className="min-w-0 flex-1 rounded-2xl border border-[#F3D8D1] bg-white px-4 py-3 text-lg font-black text-[#0A6962] outline-none focus:border-[#F07167]"
+                    autoFocus
+                  />
+                  <button onClick={saveDisplayName} disabled={saving} className="rounded-2xl bg-[#0081A7] px-4 py-2 text-sm font-bold text-white disabled:opacity-60">Lưu</button>
+                  <button onClick={cancelEditDisplayName} className="rounded-2xl bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66]">Hủy</button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">{displayName}</p>
+                  <button onClick={() => setEditingDisplayName(true)} className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white">Đổi tên</button>
+                </div>
+                <h1 className="mt-1 text-3xl font-black tracking-tight text-[#0A6962] md:text-4xl">Habit Tracker</h1>
+                <p className="mt-1 text-sm text-[#756B66]">Theo dõi việc tuần và thói quen tháng thật gọn gàng.</p>
+              </div>
+            )
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -481,6 +572,12 @@ export default function HabitTrackerApp() {
             isItemDone={isItemDone}
             toggleDone={toggleDone}
             deleteItem={deleteItem}
+            editingItemId={editingItemId}
+            editingTitle={editingTitle}
+            setEditingTitle={setEditingTitle}
+            startEditItem={startEditItem}
+            cancelEditItem={cancelEditItem}
+            saveEditItem={saveEditItem}
           />
 
           <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
@@ -525,6 +622,12 @@ export default function HabitTrackerApp() {
             isItemDone={isItemDone}
             toggleDone={toggleDone}
             deleteItem={deleteItem}
+            editingItemId={editingItemId}
+            editingTitle={editingTitle}
+            setEditingTitle={setEditingTitle}
+            startEditItem={startEditItem}
+            cancelEditItem={cancelEditItem}
+            saveEditItem={saveEditItem}
           />
 
           <MonthlyHabitTracker
@@ -535,6 +638,12 @@ export default function HabitTrackerApp() {
             isItemDone={isItemDone}
             toggleDone={toggleDone}
             deleteItem={deleteItem}
+            editingItemId={editingItemId}
+            editingTitle={editingTitle}
+            setEditingTitle={setEditingTitle}
+            startEditItem={startEditItem}
+            cancelEditItem={cancelEditItem}
+            saveEditItem={saveEditItem}
           />
         </main>
       </div>
@@ -542,7 +651,7 @@ export default function HabitTrackerApp() {
   );
 }
 
-function TodayBoard({ todayKey, todayTasks, habits, todayProgress, todayDoneCount, totalToday, isItemDone, toggleDone, deleteItem }) {
+function TodayBoard({ todayKey, todayTasks, habits, todayProgress, todayDoneCount, totalToday, isItemDone, toggleDone, deleteItem, editingItemId, editingTitle, setEditingTitle, startEditItem, cancelEditItem, saveEditItem }) {
   const todayLabel = new Date().toLocaleDateString("vi-VN", {
     weekday: "long",
     day: "2-digit",
@@ -585,6 +694,12 @@ function TodayBoard({ todayKey, todayTasks, habits, todayProgress, todayDoneCoun
                   isItemDone={isItemDone}
                   toggleDone={toggleDone}
                   deleteItem={deleteItem}
+                  editingItemId={editingItemId}
+                  editingTitle={editingTitle}
+                  setEditingTitle={setEditingTitle}
+                  startEditItem={startEditItem}
+                  cancelEditItem={cancelEditItem}
+                  saveEditItem={saveEditItem}
                 />
               ))
             )}
@@ -609,6 +724,12 @@ function TodayBoard({ todayKey, todayTasks, habits, todayProgress, todayDoneCoun
                   isItemDone={isItemDone}
                   toggleDone={toggleDone}
                   deleteItem={deleteItem}
+                  editingItemId={editingItemId}
+                  editingTitle={editingTitle}
+                  setEditingTitle={setEditingTitle}
+                  startEditItem={startEditItem}
+                  cancelEditItem={cancelEditItem}
+                  saveEditItem={saveEditItem}
                 />
               ))
             )}
@@ -619,8 +740,9 @@ function TodayBoard({ todayKey, todayTasks, habits, todayProgress, todayDoneCoun
   );
 }
 
-function TodayItem({ item, dateKey, isItemDone, toggleDone, deleteItem }) {
+function TodayItem({ item, dateKey, isItemDone, toggleDone, deleteItem, editingItemId, editingTitle, setEditingTitle, startEditItem, cancelEditItem, saveEditItem }) {
   const done = isItemDone(item, dateKey);
+  const isEditing = editingItemId === item.id;
 
   return (
     <div className="group flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-[#F0E1D9] transition hover:-translate-y-0.5 hover:shadow-sm">
@@ -634,15 +756,40 @@ function TodayItem({ item, dateKey, isItemDone, toggleDone, deleteItem }) {
       </button>
 
       <div className="min-w-0 flex-1">
-        <p className={`text-sm font-bold leading-5 ${done ? "text-[#A0938E] line-through" : "text-[#3F3A36]"}`}>{item.title}</p>
-        {item.type === "task" && item.rollover_count > 0 && !item.completed_date && (
-          <p className="mt-1 text-xs font-bold text-[#C65D54]">Chuyển tiếp {item.rollover_count} ngày</p>
+        {isEditing ? (
+          <div className="space-y-2">
+            <input
+              value={editingTitle}
+              onChange={(e) => setEditingTitle(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && saveEditItem(item)}
+              className="w-full rounded-xl border border-[#F3D8D1] px-3 py-2 text-sm font-bold outline-none focus:border-[#F07167]"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button onClick={() => saveEditItem(item)} className="rounded-full bg-[#0081A7] px-3 py-1 text-xs font-bold text-white">Lưu</button>
+              <button onClick={cancelEditItem} className="rounded-full bg-[#F6EEE9] px-3 py-1 text-xs font-bold text-[#756B66]">Hủy</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className={`text-sm font-bold leading-5 ${done ? "text-[#A0938E] line-through" : "text-[#3F3A36]"}`}>{item.title}</p>
+            {item.type === "task" && item.rollover_count > 0 && !item.completed_date && (
+              <p className="mt-1 text-xs font-bold text-[#C65D54]">Chuyển tiếp {item.rollover_count} ngày</p>
+            )}
+          </>
         )}
       </div>
 
-      <button onClick={() => deleteItem(item)} className="hidden rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] group-hover:block hover:bg-[#F07167] hover:text-white">
-        Xóa
-      </button>
+      {!isEditing && (
+        <div className="flex gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100">
+          <button onClick={() => startEditItem(item)} className="rounded-full bg-[#EAF7FA] px-3 py-1 text-xs font-bold text-[#0081A7] hover:bg-[#0081A7] hover:text-white">
+            Sửa
+          </button>
+          <button onClick={() => deleteItem(item)} className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white">
+            Xóa
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -705,7 +852,7 @@ function AuthScreen({ email, setEmail, password, setPassword, showPassword, setS
   );
 }
 
-function WeeklyTaskBoard({ weekDays, selectedDate, setSelectedDate, getTasksForDate, isItemDone, toggleDone, deleteItem }) {
+function WeeklyTaskBoard({ weekDays, selectedDate, setSelectedDate, getTasksForDate, isItemDone, toggleDone, deleteItem, editingItemId, editingTitle, setEditingTitle, startEditItem, cancelEditItem, saveEditItem }) {
   const weekLabel = `${weekDays[0].toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" })} - ${weekDays[6].toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}`;
 
   return (
@@ -724,26 +871,47 @@ function WeeklyTaskBoard({ weekDays, selectedDate, setSelectedDate, getTasksForD
         />
       </div>
 
-      <div className="grid gap-3 md:grid-cols-7">
+      <div className="grid gap-2 md:grid-cols-7">
         {weekDays.map((day, index) => {
           const dateKey = getDateKey(day);
           const dayTasks = getTasksForDate(dateKey);
           return (
-            <div key={dateKey} className="min-h-[170px] rounded-[22px] border border-[#F0E1D9] bg-[#FFFDFC] p-3">
-              <div className="mb-3 border-b border-[#F0E1D9] pb-2 text-center">
+            <div key={dateKey} className="min-h-[140px] rounded-[18px] border border-[#F0E1D9] bg-[#FFFDFC] p-2">
+              <div className="mb-2 border-b border-[#F0E1D9] pb-1.5 text-center">
                 <p className="text-sm font-black text-[#0081A7]">{WEEK_LABELS[index]}</p>
                 <p className="text-xs text-[#756B66]">{day.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" })}</p>
               </div>
 
               <div className="space-y-2">
                 {dayTasks.length === 0 ? (
-                  <p className="rounded-2xl bg-[#FFF9F4] px-3 py-3 text-center text-xs text-[#A0918B]">Trống</p>
+                  <p className="rounded-xl bg-[#FFF9F4] px-2 py-2 text-center text-xs text-[#A0918B]">Trống</p>
                 ) : (
                   dayTasks.map((task) => (
-                    <div key={`${dateKey}-${task.id}`} className="group flex items-start gap-2 rounded-2xl bg-[#FFF9F4] px-3 py-2">
-                      <button onClick={() => toggleDone(task, dateKey)} className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border text-xs font-black ${isItemDone(task, dateKey) ? "border-[#0081A7] bg-[#0081A7] text-white" : "border-[#C9B8B0] bg-white text-transparent"}`}>✓</button>
-                      <span className={`flex-1 text-sm leading-5 ${isItemDone(task, dateKey) ? "text-[#A0938E] line-through" : "text-[#3F3A36]"}`}>{task.title}</span>
-                      <button onClick={() => deleteItem(task)} className="hidden text-xs font-bold text-[#C65D54] group-hover:block">×</button>
+                    <div key={`${dateKey}-${task.id}`} className="group flex items-start gap-1.5 rounded-xl bg-[#FFF9F4] px-2 py-1.5">
+                      <button onClick={() => toggleDone(task, dateKey)} className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border text-[10px] font-black ${isItemDone(task, dateKey) ? "border-[#0081A7] bg-[#0081A7] text-white" : "border-[#C9B8B0] bg-white text-transparent"}`}>✓</button>
+                      {editingItemId === task.id ? (
+                        <div className="flex-1 space-y-2">
+                          <input
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && saveEditItem(task)}
+                            className="w-full rounded-xl border border-[#F3D8D1] px-2 py-1 text-xs font-bold outline-none focus:border-[#F07167]"
+                            autoFocus
+                          />
+                          <div className="flex gap-1">
+                            <button onClick={() => saveEditItem(task)} className="rounded-full bg-[#0081A7] px-2 py-1 text-[11px] font-bold text-white">Lưu</button>
+                            <button onClick={cancelEditItem} className="rounded-full bg-[#F6EEE9] px-2 py-1 text-[11px] font-bold text-[#756B66]">Hủy</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <span className={`flex-1 break-words text-xs leading-4 ${isItemDone(task, dateKey) ? "text-[#A0938E] line-through" : "text-[#3F3A36]"}`}>{task.title}</span>
+                          <div className="hidden gap-1 group-hover:flex">
+                            <button onClick={() => startEditItem(task)} className="text-xs font-bold text-[#0081A7]">Sửa</button>
+                            <button onClick={() => deleteItem(task)} className="text-xs font-bold text-[#C65D54]">×</button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))
                 )}
@@ -756,7 +924,7 @@ function WeeklyTaskBoard({ weekDays, selectedDate, setSelectedDate, getTasksForD
   );
 }
 
-function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits, isItemDone, toggleDone, deleteItem }) {
+function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits, isItemDone, toggleDone, deleteItem, editingItemId, editingTitle, setEditingTitle, startEditItem, cancelEditItem, saveEditItem }) {
   return (
     <section className="rounded-[28px] border border-[#F3D8D1] bg-white p-5 shadow-sm">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -776,17 +944,17 @@ function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits,
         <table className="w-full min-w-[980px] border-collapse bg-[#FFFDFC] text-sm">
           <thead>
             <tr className="border-b border-[#E7D5CC] bg-[#FFF4F1]">
-              <th className="sticky left-0 z-10 min-w-[220px] bg-[#FFF4F1] px-4 py-3 text-left font-black text-[#3F3A36]">Habit</th>
+              <th className="sticky left-0 z-10 min-w-[260px] bg-[#FFF4F1] px-4 py-3 text-left font-black text-[#3F3A36]">Habit</th>
               {monthDays.map((day) => (
                 <th key={getDateKey(day)} className="px-2 py-3 text-center font-black text-[#756B66]">{day.getDate()}</th>
               ))}
-              <th className="min-w-[60px] px-3 py-3 text-center font-black text-[#756B66]">Xóa</th>
+              
             </tr>
           </thead>
           <tbody>
             {habits.length === 0 ? (
               <tr>
-                <td colSpan={monthDays.length + 2} className="px-4 py-8 text-center text-[#8D7E77]">Chưa có thói quen nào. Chị thêm thói quen ở phía trên nhé.</td>
+                <td colSpan={monthDays.length + 1} className="px-4 py-8 text-center text-[#8D7E77]">Chưa có thói quen nào. Chị thêm thói quen ở phía trên nhé.</td>
               </tr>
             ) : (
               habits.map((habit) => {
@@ -794,8 +962,30 @@ function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits,
                 return (
                   <tr key={habit.id} className="border-b border-[#F0E1D9] last:border-b-0">
                     <td className="sticky left-0 z-10 bg-[#FFFDFC] px-4 py-3">
-                      <div className="font-bold text-[#3F3A36]">{habit.title}</div>
-                      <div className="text-xs text-[#9A8B85]">{doneCount}/{monthDays.length} ngày</div>
+                      {editingItemId === habit.id ? (
+                        <div className="space-y-2">
+                          <input
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && saveEditItem(habit)}
+                            className="w-full rounded-xl border border-[#F3D8D1] px-3 py-2 text-sm font-bold outline-none focus:border-[#F07167]"
+                            autoFocus
+                          />
+                          <div className="flex gap-2">
+                            <button onClick={() => saveEditItem(habit)} className="rounded-full bg-[#0081A7] px-3 py-1 text-xs font-bold text-white">Lưu</button>
+                            <button onClick={cancelEditItem} className="rounded-full bg-[#F6EEE9] px-3 py-1 text-xs font-bold text-[#756B66]">Hủy</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-bold text-[#3F3A36]">{habit.title}</div>
+                          <div className="mt-1 text-xs text-[#9A8B85]">{doneCount}/{monthDays.length} ngày</div>
+                          <div className="mt-2 flex gap-2">
+                            <button onClick={() => startEditItem(habit)} className="rounded-full bg-[#EAF7FA] px-3 py-1 text-xs font-bold text-[#0081A7] hover:bg-[#0081A7] hover:text-white">Sửa</button>
+                            <button onClick={() => deleteItem(habit)} className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white">Xóa</button>
+                          </div>
+                        </div>
+                      )}
                     </td>
                     {monthDays.map((day) => {
                       const dateKey = getDateKey(day);
@@ -812,9 +1002,7 @@ function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits,
                         </td>
                       );
                     })}
-                    <td className="px-3 py-3 text-center">
-                      <button onClick={() => deleteItem(habit)} className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white">Xóa</button>
-                    </td>
+                    
                   </tr>
                 );
               })
