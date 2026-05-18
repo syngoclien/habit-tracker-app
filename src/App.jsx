@@ -518,48 +518,88 @@ export default function HabitTrackerApp() {
     <div className="min-h-screen bg-[#FFF9F4] px-4 py-6 text-[#3F3A36] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <header className="mb-5 flex flex-col gap-4 rounded-[28px] border border-[#F3D8D1] bg-white px-5 py-5 shadow-sm md:flex-row md:items-center md:justify-between">
-          <div>
-            {editingDisplayName ? (
-              <div className="max-w-md space-y-2">
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">Tên hiển thị</p>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <input
-                    value={displayNameInput}
-                    onChange={(e) => setDisplayNameInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
-                    className="min-w-0 flex-1 rounded-2xl border border-[#F3D8D1] bg-white px-4 py-3 text-lg font-black text-[#0A6962] outline-none focus:border-[#F07167]"
-                    autoFocus
-                  />
-                  <button onClick={saveDisplayName} disabled={saving} className="rounded-2xl bg-[#0081A7] px-4 py-2 text-sm font-bold text-white disabled:opacity-60">Lưu</button>
-                  <button onClick={cancelEditDisplayName} className="rounded-2xl bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66]">Hủy</button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">{displayName}</p>
-                  <button onClick={() => setEditingDisplayName(true)} className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white">Đổi tên</button>
-                </div>
-                <h1 className="mt-1 text-3xl font-black tracking-tight text-[#0A6962] md:text-4xl">Habit Tracker</h1>
-                <p className="mt-1 text-sm text-[#756B66]">Theo dõi việc tuần và thói quen tháng thật gọn gàng.</p>
-              </div>
-            )
-          </div>
+  {editingDisplayName ? (
+    <div className="max-w-md space-y-2">
+      <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">
+        Tên hiển thị
+      </p>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-[#FFF0EA] px-4 py-2 text-sm font-bold text-[#C65D54]">Hôm nay: {todayProgress}%</span>
-            <span className="rounded-full bg-[#EAF7FA] px-4 py-2 text-sm font-bold text-[#0081A7]">{session.user.email}</span>
-            {!isInstalled && (
-              <button
-                onClick={handleInstallApp}
-                className="rounded-full bg-[#0081A7] px-4 py-2 text-sm font-bold text-white hover:opacity-90"
-              >
-                Cài app
-              </button>
-            )}
-            <button onClick={signOut} className="rounded-full bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66] hover:bg-[#F07167] hover:text-white">Đăng xuất</button>
-          </div>
-        </header>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          value={displayNameInput}
+          onChange={(e) => setDisplayNameInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
+          className="min-w-0 flex-1 rounded-2xl border border-[#F3D8D1] bg-white px-4 py-3 text-lg font-black text-[#0A6962] outline-none focus:border-[#F07167]"
+          autoFocus
+        />
+
+        <button
+          onClick={saveDisplayName}
+          disabled={saving}
+          className="rounded-2xl bg-[#0081A7] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+        >
+          Lưu
+        </button>
+
+        <button
+          onClick={cancelEditDisplayName}
+          className="rounded-2xl bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66]"
+        >
+          Hủy
+        </button>
+      </div>
+    </div>
+  ) : (
+    <div>
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#F07167]">
+          {displayName}
+        </p>
+
+        <button
+          onClick={() => setEditingDisplayName(true)}
+          className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] hover:bg-[#F07167] hover:text-white"
+        >
+          Đổi tên
+        </button>
+      </div>
+
+      <h1 className="mt-1 text-3xl font-black tracking-tight text-[#0A6962] md:text-4xl">
+        Habit Tracker
+      </h1>
+
+      <p className="mt-1 text-sm text-[#756B66]">
+        Theo dõi việc tuần và thói quen tháng thật gọn gàng.
+      </p>
+    </div>
+  )}
+
+  <div className="flex flex-wrap items-center gap-2">
+    <span className="rounded-full bg-[#FFF0EA] px-4 py-2 text-sm font-bold text-[#C65D54]">
+      Hôm nay: {todayProgress}%
+    </span>
+
+    <span className="rounded-full bg-[#EAF7FA] px-4 py-2 text-sm font-bold text-[#0081A7]">
+      {session.user.email}
+    </span>
+
+    {!isInstalled && (
+      <button
+        onClick={handleInstallApp}
+        className="rounded-full bg-[#0081A7] px-4 py-2 text-sm font-bold text-white hover:opacity-90"
+      >
+        Cài app
+      </button>
+    )}
+
+    <button
+      onClick={signOut}
+      className="rounded-full bg-[#F6EEE9] px-4 py-2 text-sm font-bold text-[#756B66] hover:bg-[#F07167] hover:text-white"
+    >
+      Đăng xuất
+    </button>
+  </div>
+</header>
 
         <main className="space-y-5">
           <TodayBoard
