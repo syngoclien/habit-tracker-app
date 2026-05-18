@@ -419,6 +419,18 @@ export default function HabitTrackerApp() {
         </header>
 
         <main className="space-y-5">
+          <TodayBoard
+            todayKey={todayKey}
+            todayTasks={todayTasks}
+            habits={habits}
+            todayProgress={todayProgress}
+            todayDoneCount={todayDoneCount}
+            totalToday={todayItems.length}
+            isItemDone={isItemDone}
+            toggleDone={toggleDone}
+            deleteItem={deleteItem}
+          />
+
           <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
             <Card title="Thêm nhiệm vụ tuần" icon="📝">
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -474,6 +486,111 @@ export default function HabitTrackerApp() {
           />
         </main>
       </div>
+    </div>
+  );
+}
+
+function TodayBoard({ todayKey, todayTasks, habits, todayProgress, todayDoneCount, totalToday, isItemDone, toggleDone, deleteItem }) {
+  const todayLabel = new Date().toLocaleDateString("vi-VN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  return (
+    <section className="rounded-[28px] border border-[#F3D8D1] bg-white p-5 shadow-sm">
+      <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#F07167]">Today</p>
+          <h2 className="text-2xl font-black text-[#0A6962]">Hôm nay cần làm</h2>
+          <p className="text-sm capitalize text-[#756B66]">{todayLabel}</p>
+        </div>
+
+        <div className="rounded-2xl bg-[#FFF0EA] px-5 py-3 text-right">
+          <p className="text-xs font-bold text-[#A8564C]">Tiến độ hôm nay</p>
+          <p className="text-3xl font-black text-[#F07167]">{todayProgress}%</p>
+          <p className="text-xs text-[#A8564C]">{todayDoneCount}/{totalToday} mục đã xong</p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-[24px] border border-[#F0E1D9] bg-[#FFFDFC] p-4">
+          <div className="mb-3 flex items-center justify-between border-b border-[#F0E1D9] pb-2">
+            <h3 className="font-black text-[#3F3A36]">📝 Công việc hôm nay</h3>
+            <span className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54]">{todayTasks.length} việc</span>
+          </div>
+
+          <div className="space-y-2">
+            {todayTasks.length === 0 ? (
+              <p className="rounded-2xl bg-[#FFF9F4] px-4 py-4 text-center text-sm text-[#9A8B85]">Hôm nay chưa có công việc nào.</p>
+            ) : (
+              todayTasks.map((task) => (
+                <TodayItem
+                  key={task.id}
+                  item={task}
+                  dateKey={todayKey}
+                  isItemDone={isItemDone}
+                  toggleDone={toggleDone}
+                  deleteItem={deleteItem}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-[24px] border border-[#D8ECF0] bg-[#F8FDFF] p-4">
+          <div className="mb-3 flex items-center justify-between border-b border-[#D8ECF0] pb-2">
+            <h3 className="font-black text-[#3F3A36]">🌿 Thói quen hôm nay</h3>
+            <span className="rounded-full bg-[#EAF7FA] px-3 py-1 text-xs font-bold text-[#0081A7]">{habits.length} thói quen</span>
+          </div>
+
+          <div className="space-y-2">
+            {habits.length === 0 ? (
+              <p className="rounded-2xl bg-white px-4 py-4 text-center text-sm text-[#9A8B85]">Chưa có thói quen nào.</p>
+            ) : (
+              habits.map((habit) => (
+                <TodayItem
+                  key={habit.id}
+                  item={habit}
+                  dateKey={todayKey}
+                  isItemDone={isItemDone}
+                  toggleDone={toggleDone}
+                  deleteItem={deleteItem}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TodayItem({ item, dateKey, isItemDone, toggleDone, deleteItem }) {
+  const done = isItemDone(item, dateKey);
+
+  return (
+    <div className="group flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-[#F0E1D9] transition hover:-translate-y-0.5 hover:shadow-sm">
+      <button
+        onClick={() => toggleDone(item, dateKey)}
+        className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border text-sm font-black ${
+          done ? "border-[#0081A7] bg-[#0081A7] text-white" : "border-[#C9B8B0] bg-white text-transparent"
+        }`}
+      >
+        ✓
+      </button>
+
+      <div className="min-w-0 flex-1">
+        <p className={`text-sm font-bold leading-5 ${done ? "text-[#A0938E] line-through" : "text-[#3F3A36]"}`}>{item.title}</p>
+        {item.type === "task" && item.rollover_count > 0 && !item.completed_date && (
+          <p className="mt-1 text-xs font-bold text-[#C65D54]">Chuyển tiếp {item.rollover_count} ngày</p>
+        )}
+      </div>
+
+      <button onClick={() => deleteItem(item)} className="hidden rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54] group-hover:block hover:bg-[#F07167] hover:text-white">
+        Xóa
+      </button>
     </div>
   );
 }
