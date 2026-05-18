@@ -1007,66 +1007,45 @@ function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits,
       </div>
 
       <div className="overflow-x-auto rounded-[22px] border border-[#F0E1D9]">
-        <table className="w-full min-w-[980px] border-collapse bg-[#FFFDFC] text-sm">
+        <table className="w-full min-w-[1080px] border-collapse bg-[#FFFDFC] text-sm">
           <thead>
             <tr className="border-b border-[#E7D5CC] bg-[#FFF4F1]">
-              <th className="sticky left-0 z-10 min-w-[260px] bg-[#FFF4F1] px-4 py-3 text-left font-black text-[#3F3A36]">Habit</th>
+              <th className="sticky left-0 z-20 min-w-[240px] bg-[#FFF4F1] px-4 py-3 text-left font-black text-[#3F3A36]">Habit</th>
               {monthDays.map((day) => (
                 <th key={getDateKey(day)} className="px-2 py-3 text-center font-black text-[#756B66]">{day.getDate()}</th>
               ))}
-              
+              <th className="sticky right-0 z-20 min-w-[120px] bg-[#FFF4F1] px-4 py-3 text-center font-black text-[#3F3A36]">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {habits.length === 0 ? (
               <tr>
-                <td colSpan={monthDays.length + 1} className="px-4 py-8 text-center text-[#8D7E77]">Chưa có thói quen nào. Chị thêm thói quen ở phía trên nhé.</td>
+                <td colSpan={monthDays.length + 2} className="px-4 py-8 text-center text-[#8D7E77]">Chưa có thói quen nào. Chị thêm thói quen ở phía trên nhé.</td>
               </tr>
             ) : (
               habits.map((habit) => {
                 const doneCount = monthDays.filter((day) => isItemDone(habit, getDateKey(day))).length;
+                const isEditing = editingItemId === habit.id;
+
                 return (
                   <tr key={habit.id} className="border-b border-[#F0E1D9] last:border-b-0">
                     <td className="sticky left-0 z-10 bg-[#FFFDFC] px-4 py-3">
-                      {editingItemId === habit.id ? (
-                        <div className="space-y-2">
-                          <input
-                            value={editingTitle}
-                            onChange={(e) => setEditingTitle(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && saveEditItem(habit)}
-                            className="w-full rounded-xl border border-[#F3D8D1] px-3 py-2 text-sm font-bold outline-none focus:border-[#F07167]"
-                            autoFocus
-                          />
-                          <div className="flex gap-2">
-                            <button onClick={() => saveEditItem(habit)} className="rounded-full bg-[#0081A7] px-3 py-1 text-xs font-bold text-white">Lưu</button>
-                            <button onClick={cancelEditItem} className="rounded-full bg-[#F6EEE9] px-3 py-1 text-xs font-bold text-[#756B66]">Hủy</button>
-                          </div>
-                        </div>
+                      {isEditing ? (
+                        <input
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && saveEditItem(habit)}
+                          className="w-full rounded-xl border border-[#F3D8D1] px-3 py-2 text-sm font-bold outline-none focus:border-[#F07167]"
+                          autoFocus
+                        />
                       ) : (
                         <div>
                           <div className="font-bold text-[#3F3A36]">{habit.title}</div>
                           <div className="mt-1 text-xs text-[#9A8B85]">{doneCount}/{monthDays.length} ngày</div>
-                          <div className="mt-2 flex gap-2">
-                            <button
-                              onClick={() => startEditItem(habit)}
-                              className="grid h-8 w-8 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
-                              title="Sửa"
-                              aria-label="Sửa"
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => deleteItem(habit)}
-                              className="grid h-8 w-8 place-items-center rounded-full text-[#C65D54]/75 hover:bg-[#FFF0EA] hover:text-[#C65D54]"
-                              title="Xóa"
-                              aria-label="Xóa"
-                            >
-                              <CloseIcon className="h-4 w-4" />
-                            </button>
-                          </div>
                         </div>
                       )}
                     </td>
+
                     {monthDays.map((day) => {
                       const dateKey = getDateKey(day);
                       const done = isItemDone(habit, dateKey);
@@ -1082,7 +1061,34 @@ function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits,
                         </td>
                       );
                     })}
-                    
+
+                    <td className="sticky right-0 z-10 bg-[#FFFDFC] px-3 py-3">
+                      {isEditing ? (
+                        <div className="flex justify-center gap-2">
+                          <button onClick={() => saveEditItem(habit)} className="rounded-full bg-[#0081A7] px-3 py-1 text-xs font-bold text-white">Lưu</button>
+                          <button onClick={cancelEditItem} className="rounded-full bg-[#F6EEE9] px-3 py-1 text-xs font-bold text-[#756B66]">Hủy</button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => startEditItem(habit)}
+                            className="grid h-8 w-8 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
+                            title="Sửa"
+                            aria-label="Sửa"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteItem(habit)}
+                            className="grid h-8 w-8 place-items-center rounded-full text-[#C65D54]/75 hover:bg-[#FFF0EA] hover:text-[#C65D54]"
+                            title="Xóa"
+                            aria-label="Xóa"
+                          >
+                            <CloseIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 );
               })
