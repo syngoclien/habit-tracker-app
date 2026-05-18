@@ -990,7 +990,21 @@ function WeeklyTaskBoard({ weekDays, selectedDate, setSelectedDate, getTasksForD
   );
 }
 
-function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits, isItemDone, toggleDone, deleteItem, editingItemId, editingTitle, setEditingTitle, startEditItem, cancelEditItem, saveEditItem }) {
+function MonthlyHabitTracker({
+  selectedDate,
+  setSelectedDate,
+  monthDays,
+  habits,
+  isItemDone,
+  toggleDone,
+  deleteItem,
+  editingItemId,
+  editingTitle,
+  setEditingTitle,
+  startEditItem,
+  cancelEditItem,
+  saveEditItem,
+}) {
   return (
     <section className="rounded-[28px] border border-[#F3D8D1] bg-white p-5 shadow-sm">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -1001,104 +1015,191 @@ function MonthlyHabitTracker({ selectedDate, setSelectedDate, monthDays, habits,
         </div>
 
         <div className="flex gap-2">
-          <button onClick={() => setSelectedDate(addDays(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1), -1))} className="rounded-full bg-[#FFF0EA] px-4 py-2 text-sm font-bold text-[#C65D54]">Tháng trước</button>
-          <button onClick={() => setSelectedDate(addDays(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1), 0))} className="rounded-full bg-[#EAF7FA] px-4 py-2 text-sm font-bold text-[#0081A7]">Tháng sau</button>
+          <button
+            onClick={() => setSelectedDate(addDays(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1), -1))}
+            className="rounded-full bg-[#FFF0EA] px-4 py-2 text-sm font-bold text-[#C65D54]"
+          >
+            Tháng trước
+          </button>
+          <button
+            onClick={() => setSelectedDate(addDays(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1), 0))}
+            className="rounded-full bg-[#EAF7FA] px-4 py-2 text-sm font-bold text-[#0081A7]"
+          >
+            Tháng sau
+          </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-[22px] border border-[#F0E1D9]">
-        <table className="w-full min-w-[1080px] border-collapse bg-[#FFFDFC] text-sm">
-          <thead>
-            <tr className="border-b border-[#E7D5CC] bg-[#FFF4F1]">
-              <th className="sticky left-0 z-20 min-w-[240px] bg-[#FFF4F1] px-4 py-3 text-left font-black text-[#3F3A36]">Habit</th>
-              {monthDays.map((day) => (
-                <th key={getDateKey(day)} className="px-2 py-3 text-center font-black text-[#756B66]">{day.getDate()}</th>
-              ))}
-              <th className="sticky right-0 z-20 min-w-[120px] bg-[#FFF4F1] px-4 py-3 text-center font-black text-[#3F3A36]">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {habits.length === 0 ? (
-              <tr>
-                <td colSpan={monthDays.length + 2} className="px-4 py-8 text-center text-[#8D7E77]">Chưa có thói quen nào. Chị thêm thói quen ở phía trên nhé.</td>
-              </tr>
-            ) : (
-              habits.map((habit) => {
-                const doneCount = monthDays.filter((day) => isItemDone(habit, getDateKey(day))).length;
-                const isEditing = editingItemId === habit.id;
+      {habits.length === 0 ? (
+        <div className="rounded-[22px] border border-[#F0E1D9] bg-[#FFFDFC] px-4 py-8 text-center text-[#8D7E77]">
+          Chưa có thói quen nào. Chị thêm thói quen ở phía trên nhé.
+        </div>
+      ) : (
+        <>
+          {/* Mobile layout */}
+          <div className="space-y-4 md:hidden">
+            {habits.map((habit) => {
+              const doneCount = monthDays.filter((day) => isItemDone(habit, getDateKey(day))).length;
+              const isEditing = editingItemId === habit.id;
 
-                return (
-                  <tr key={habit.id} className="border-b border-[#F0E1D9] last:border-b-0">
-                    <td className="sticky left-0 z-10 bg-[#FFFDFC] px-4 py-3">
-                      {isEditing ? (
-                        <input
-                          value={editingTitle}
-                          onChange={(e) => setEditingTitle(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && saveEditItem(habit)}
-                          className="w-full rounded-xl border border-[#F3D8D1] px-3 py-2 text-sm font-bold outline-none focus:border-[#F07167]"
-                          autoFocus
-                        />
-                      ) : (
-                        <div>
-                          <div className="font-bold text-[#3F3A36]">{habit.title}</div>
-                          <div className="mt-1 text-xs text-[#9A8B85]">{doneCount}/{monthDays.length} ngày</div>
-                        </div>
-                      )}
-                    </td>
+              return (
+                <div key={habit.id} className="rounded-[22px] border border-[#F0E1D9] bg-[#FFFDFC] p-4">
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <input
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && saveEditItem(habit)}
+                        className="w-full rounded-xl border border-[#F3D8D1] px-3 py-2 text-sm font-bold outline-none focus:border-[#F07167]"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={() => saveEditItem(habit)} className="rounded-full bg-[#0081A7] px-3 py-1 text-xs font-bold text-white">Lưu</button>
+                        <button onClick={cancelEditItem} className="rounded-full bg-[#F6EEE9] px-3 py-1 text-xs font-bold text-[#756B66]">Hủy</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div>
+                        <div className="font-bold text-[#3F3A36]">{habit.title}</div>
+                        <div className="mt-1 text-xs text-[#9A8B85]">{doneCount}/{monthDays.length} ngày</div>
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <button
+                          onClick={() => startEditItem(habit)}
+                          className="grid h-9 w-9 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
+                          title="Sửa"
+                          aria-label="Sửa"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteItem(habit)}
+                          className="grid h-9 w-9 place-items-center rounded-full text-[#C65D54]/75 hover:bg-[#FFF0EA] hover:text-[#C65D54]"
+                          title="Xóa"
+                          aria-label="Xóa"
+                        >
+                          <CloseIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
+                  <div className="grid grid-cols-7 gap-2">
                     {monthDays.map((day) => {
                       const dateKey = getDateKey(day);
                       const done = isItemDone(habit, dateKey);
                       return (
-                        <td key={`${habit.id}-${dateKey}`} className="px-2 py-3 text-center">
+                        <div key={`${habit.id}-${dateKey}`} className="flex flex-col items-center gap-1">
+                          <span className="text-[11px] font-bold text-[#8D7E77]">{day.getDate()}</span>
                           <button
                             onClick={() => toggleDone(habit, dateKey)}
-                            className={`mx-auto grid h-7 w-7 place-items-center rounded-full border text-sm font-black transition ${done ? "border-[#F07167] bg-[#FAD1D0] text-[#9E3F3C]" : "border-[#C9B8B0] bg-white text-transparent hover:border-[#F07167]"}`}
+                            className={`grid h-8 w-8 place-items-center rounded-full border text-xs font-black transition ${done ? "border-[#F07167] bg-[#FAD1D0] text-[#9E3F3C]" : "border-[#C9B8B0] bg-white text-transparent hover:border-[#F07167]"}`}
                             title={dateKey}
                           >
                             ✓
                           </button>
-                        </td>
+                        </div>
                       );
                     })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-                    <td className="sticky right-0 z-10 bg-[#FFFDFC] px-3 py-3">
-                      {isEditing ? (
-                        <div className="flex justify-center gap-2">
-                          <button onClick={() => saveEditItem(habit)} className="rounded-full bg-[#0081A7] px-3 py-1 text-xs font-bold text-white">Lưu</button>
-                          <button onClick={cancelEditItem} className="rounded-full bg-[#F6EEE9] px-3 py-1 text-xs font-bold text-[#756B66]">Hủy</button>
-                        </div>
-                      ) : (
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => startEditItem(habit)}
-                            className="grid h-8 w-8 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
-                            title="Sửa"
-                            aria-label="Sửa"
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => deleteItem(habit)}
-                            className="grid h-8 w-8 place-items-center rounded-full text-[#C65D54]/75 hover:bg-[#FFF0EA] hover:text-[#C65D54]"
-                            title="Xóa"
-                            aria-label="Xóa"
-                          >
-                            <CloseIcon className="h-4 w-4" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+          {/* Desktop/tablet layout */}
+          <div className="hidden overflow-x-auto rounded-[22px] border border-[#F0E1D9] md:block">
+            <table className="w-full min-w-[1100px] border-collapse bg-[#FFFDFC] text-sm">
+              <thead>
+                <tr className="border-b border-[#E7D5CC] bg-[#FFF4F1]">
+                  <th className="sticky left-0 z-20 min-w-[240px] bg-[#FFF4F1] px-4 py-3 text-left font-black text-[#3F3A36]">Habit</th>
+                  {monthDays.map((day) => (
+                    <th key={getDateKey(day)} className="px-2 py-3 text-center font-black text-[#756B66]">{day.getDate()}</th>
+                  ))}
+                  <th className="sticky right-0 z-20 min-w-[120px] bg-[#FFF4F1] px-4 py-3 text-center font-black text-[#3F3A36]">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {habits.map((habit) => {
+                  const doneCount = monthDays.filter((day) => isItemDone(habit, getDateKey(day))).length;
+                  const isEditing = editingItemId === habit.id;
+
+                  return (
+                    <tr key={habit.id} className="border-b border-[#F0E1D9] last:border-b-0">
+                      <td className="sticky left-0 z-10 bg-[#FFFDFC] px-4 py-3">
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <input
+                              value={editingTitle}
+                              onChange={(e) => setEditingTitle(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && saveEditItem(habit)}
+                              className="w-full rounded-xl border border-[#F3D8D1] px-3 py-2 text-sm font-bold outline-none focus:border-[#F07167]"
+                              autoFocus
+                            />
+                            <div className="flex gap-2">
+                              <button onClick={() => saveEditItem(habit)} className="rounded-full bg-[#0081A7] px-3 py-1 text-xs font-bold text-white">Lưu</button>
+                              <button onClick={cancelEditItem} className="rounded-full bg-[#F6EEE9] px-3 py-1 text-xs font-bold text-[#756B66]">Hủy</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="font-bold text-[#3F3A36]">{habit.title}</div>
+                            <div className="mt-1 text-xs text-[#9A8B85]">{doneCount}/{monthDays.length} ngày</div>
+                          </div>
+                        )}
+                      </td>
+
+                      {monthDays.map((day) => {
+                        const dateKey = getDateKey(day);
+                        const done = isItemDone(habit, dateKey);
+                        return (
+                          <td key={`${habit.id}-${dateKey}`} className="px-2 py-3 text-center">
+                            <button
+                              onClick={() => toggleDone(habit, dateKey)}
+                              className={`mx-auto grid h-7 w-7 place-items-center rounded-full border text-sm font-black transition ${done ? "border-[#F07167] bg-[#FAD1D0] text-[#9E3F3C]" : "border-[#C9B8B0] bg-white text-transparent hover:border-[#F07167]"}`}
+                              title={dateKey}
+                            >
+                              ✓
+                            </button>
+                          </td>
+                        );
+                      })}
+
+                      <td className="sticky right-0 z-10 bg-[#FFFDFC] px-4 py-3">
+                        {!isEditing && (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => startEditItem(habit)}
+                              className="grid h-8 w-8 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
+                              title="Sửa"
+                              aria-label="Sửa"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteItem(habit)}
+                              className="grid h-8 w-8 place-items-center rounded-full text-[#C65D54]/75 hover:bg-[#FFF0EA] hover:text-[#C65D54]"
+                              title="Xóa"
+                              aria-label="Xóa"
+                            >
+                              <CloseIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </section>
   );
 }
+
 
 function Card({ title, icon, children }) {
   return (
