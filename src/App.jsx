@@ -718,67 +718,81 @@ function TodayBoard({ todayKey, todayTasks, habits, todayProgress, todayDoneCoun
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-[24px] border border-[#F0E1D9] bg-[#FFFDFC] p-4">
-          <div className="mb-3 flex items-center justify-between border-b border-[#F0E1D9] pb-2">
-            <h3 className="font-black text-[#3F3A36]">📝 Công việc hôm nay</h3>
-            <span className="rounded-full bg-[#FFF0EA] px-3 py-1 text-xs font-bold text-[#C65D54]">{todayTasks.length} việc</span>
-          </div>
+        <TodayListPanel
+          title="📝 Công việc hôm nay"
+          countLabel={`${todayTasks.length} việc`}
+          emptyText="Hôm nay chưa có công việc nào."
+          tone="task"
+        >
+          {todayTasks.map((task) => (
+            <TodayItem
+              key={task.id}
+              item={task}
+              dateKey={todayKey}
+              isItemDone={isItemDone}
+              toggleDone={toggleDone}
+              deleteItem={deleteItem}
+              editingItemId={editingItemId}
+              editingTitle={editingTitle}
+              setEditingTitle={setEditingTitle}
+              startEditItem={startEditItem}
+              cancelEditItem={cancelEditItem}
+              saveEditItem={saveEditItem}
+            />
+          ))}
+        </TodayListPanel>
 
-          <div className="space-y-2">
-            {todayTasks.length === 0 ? (
-              <p className="rounded-2xl bg-[#FFF9F4] px-4 py-4 text-center text-sm text-[#9A8B85]">Hôm nay chưa có công việc nào.</p>
-            ) : (
-              todayTasks.map((task) => (
-                <TodayItem
-                  key={task.id}
-                  item={task}
-                  dateKey={todayKey}
-                  isItemDone={isItemDone}
-                  toggleDone={toggleDone}
-                  deleteItem={deleteItem}
-                  editingItemId={editingItemId}
-                  editingTitle={editingTitle}
-                  setEditingTitle={setEditingTitle}
-                  startEditItem={startEditItem}
-                  cancelEditItem={cancelEditItem}
-                  saveEditItem={saveEditItem}
-                />
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-[24px] border border-[#D8ECF0] bg-[#F8FDFF] p-4">
-          <div className="mb-3 flex items-center justify-between border-b border-[#D8ECF0] pb-2">
-            <h3 className="font-black text-[#3F3A36]">🌿 Thói quen hôm nay</h3>
-            <span className="rounded-full bg-[#EAF7FA] px-3 py-1 text-xs font-bold text-[#0081A7]">{habits.length} thói quen</span>
-          </div>
-
-          <div className="space-y-2">
-            {habits.length === 0 ? (
-              <p className="rounded-2xl bg-white px-4 py-4 text-center text-sm text-[#9A8B85]">Chưa có thói quen nào.</p>
-            ) : (
-              habits.map((habit) => (
-                <TodayItem
-                  key={habit.id}
-                  item={habit}
-                  dateKey={todayKey}
-                  isItemDone={isItemDone}
-                  toggleDone={toggleDone}
-                  deleteItem={deleteItem}
-                  editingItemId={editingItemId}
-                  editingTitle={editingTitle}
-                  setEditingTitle={setEditingTitle}
-                  startEditItem={startEditItem}
-                  cancelEditItem={cancelEditItem}
-                  saveEditItem={saveEditItem}
-                />
-              ))
-            )}
-          </div>
-        </div>
+        <TodayListPanel
+          title="🌿 Thói quen hôm nay"
+          countLabel={`${habits.length} thói quen`}
+          emptyText="Chưa có thói quen nào."
+          tone="habit"
+        >
+          {habits.map((habit) => (
+            <TodayItem
+              key={habit.id}
+              item={habit}
+              dateKey={todayKey}
+              isItemDone={isItemDone}
+              toggleDone={toggleDone}
+              deleteItem={deleteItem}
+              editingItemId={editingItemId}
+              editingTitle={editingTitle}
+              setEditingTitle={setEditingTitle}
+              startEditItem={startEditItem}
+              cancelEditItem={cancelEditItem}
+              saveEditItem={saveEditItem}
+            />
+          ))}
+        </TodayListPanel>
       </div>
     </section>
+  );
+}
+
+function TodayListPanel({ title, countLabel, emptyText, tone = "task", children }) {
+  const isHabit = tone === "habit";
+  const itemCount = React.Children.count(children);
+
+  return (
+    <div className={`rounded-[24px] border p-4 ${isHabit ? "border-[#D8ECF0] bg-[#F8FDFF]" : "border-[#F0E1D9] bg-[#FFFDFC]"}`}>
+      <div className={`mb-3 flex items-center justify-between border-b pb-2 ${isHabit ? "border-[#D8ECF0]" : "border-[#F0E1D9]"}`}>
+        <h3 className="font-black text-[#3F3A36]">{title}</h3>
+        <span className={`rounded-full px-3 py-1 text-xs font-bold ${isHabit ? "bg-[#EAF7FA] text-[#0081A7]" : "bg-[#FFF0EA] text-[#C65D54]"}`}>
+          {countLabel}
+        </span>
+      </div>
+
+      {itemCount === 0 ? (
+        <p className="rounded-2xl bg-white px-4 py-4 text-center text-sm text-[#9A8B85]">
+          {emptyText}
+        </p>
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-[#F0E1D9] bg-white divide-y divide-[#F0E1D9]">
+          {children}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -787,7 +801,7 @@ function TodayItem({ item, dateKey, isItemDone, toggleDone, deleteItem, editingI
   const isEditing = editingItemId === item.id;
 
   return (
-    <div className="group flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-[#F0E1D9] transition hover:-translate-y-0.5 hover:shadow-sm">
+    <div className="group flex items-center gap-3 px-3 py-2.5 transition hover:bg-[#FFF9F4] sm:px-4 sm:py-3">
       <button
         onClick={() => toggleDone(item, dateKey)}
         className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border text-sm font-black ${
@@ -823,7 +837,7 @@ function TodayItem({ item, dateKey, isItemDone, toggleDone, deleteItem, editingI
       </div>
 
       {!isEditing && (
-        <div className="flex gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100">
+        <div className="flex shrink-0 gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100">
           <button
             onClick={() => startEditItem(item)}
             className="grid h-8 w-8 place-items-center rounded-full text-[#0081A7]/75 hover:bg-[#EAF7FA] hover:text-[#0081A7]"
